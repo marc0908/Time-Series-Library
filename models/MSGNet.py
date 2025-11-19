@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.fft
-from layers.Embed import DataEmbedding
-from layers.MSGBlock import GraphBlock, simpleVIT, Attention_Block, Predict
+from ..layers.Embed import DataEmbedding
+from ..layers.MSGBlock import GraphBlock, simpleVIT, Attention_Block, Predict
 
 
 def FFT_for_Period(x, k=2):

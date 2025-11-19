@@ -6,7 +6,7 @@ import torch
 from torch import nn, Tensor
 from einops import rearrange
 from einops.layers.torch import Rearrange
-from utils.masking import TriangularCausalMask
+from ..utils.masking import TriangularCausalMask
 
 class Predict(nn.Module):
     def __init__(self,  individual, c_out, seq_len, pred_len, dropout):

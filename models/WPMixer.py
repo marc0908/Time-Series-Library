@@ -9,7 +9,7 @@ https://github.com/Secure-and-Intelligent-Systems-Lab/WPMixer
 
 import torch.nn as nn
 import torch
-from layers.DWT_Decomposition import Decomposition
+from ..layers.DWT_Decomposition import Decomposition
 
 
 class TokenMixer(nn.Module):
