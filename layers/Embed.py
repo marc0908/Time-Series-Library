@@ -154,11 +154,25 @@ class DataEmbedding_wo_pos(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
-        if x_mark is None:
-            x = self.value_embedding(x)
+        # changed this here in order to run timemixer!
+        if x_mark is not None:
+            # Synchronize time dimension if off-by-one due to pooling
+            if x.size(1) != x_mark.size(1):
+                min_len = min(x.size(1), x_mark.size(1))
+                x = x[:, :min_len, :]
+                x_mark = x_mark[:, :min_len, :]
+            return self.dropout(
+                self.value_embedding(x) + self.temporal_embedding(x_mark)
+            )
         else:
-            x = self.value_embedding(x) + self.temporal_embedding(x_mark)
-        return self.dropout(x)
+            return self.dropout(self.value_embedding(x))
+
+        # if x_mark is None:
+        #     x = self.value_embedding(x)
+        # else:
+        #     x = self.value_embedding(x) + self.temporal_embedding(x_mark)
+        # return self.dropout(x)
+
 
 
 class PatchEmbedding(nn.Module):
