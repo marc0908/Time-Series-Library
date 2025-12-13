@@ -153,7 +153,21 @@ class FourierLayer(nn.Module):
 
         x_freq, index_tuple = self.topk_freq(x_freq)
         f = repeat(f, 'f -> b f d', b=x_freq.size(0), d=x_freq.size(2))
-        f = rearrange(f[index_tuple], 'b f d -> b f () d').to(x_freq.device)
+        
+        
+        # Make sure that f is on the same device as x_freq
+        device = x_freq.device
+        f = f.to(device)
+
+        # if index_tuple consists of tensors, also pull idecies to same device
+        if isinstance(index_tuple, tuple):
+            index_tuple = tuple(
+                idx.to(device) if torch.is_tensor(idx) else idx
+                for idx in index_tuple
+            )
+
+        # jetzt erst indexieren
+        f = rearrange(f[index_tuple], "b f d -> b f () d")
 
         return self.extrapolate(x_freq, f, t)
 
