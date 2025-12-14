@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 
+FREQ_MAP = {'h': 4, 't': 5, 's': 6, 'm': 1, 'a': 1, 'w': 2, 'd': 3, 'b': 3}
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -96,9 +97,7 @@ class TimeFeatureEmbedding(nn.Module):
     def __init__(self, d_model, embed_type='timeF', freq='h'):
         super(TimeFeatureEmbedding, self).__init__()
 
-        freq_map = {'h': 4, 't': 5, 's': 6,
-                    'm': 1, 'a': 1, 'w': 2, 'd': 3, 'b': 3}
-        d_inp = freq_map[freq]
+        d_inp = FREQ_MAP[freq]
         self.embed = nn.Linear(d_inp, d_model, bias=False)
 
     def forward(self, x):
@@ -155,23 +154,23 @@ class DataEmbedding_wo_pos(nn.Module):
 
     def forward(self, x, x_mark):
         # changed this here in order to run timemixer!
-        if x_mark is not None:
-            # Synchronize time dimension if off-by-one due to pooling
-            if x.size(1) != x_mark.size(1):
-                min_len = min(x.size(1), x_mark.size(1))
-                x = x[:, :min_len, :]
-                x_mark = x_mark[:, :min_len, :]
-            return self.dropout(
-                self.value_embedding(x) + self.temporal_embedding(x_mark)
-            )
-        else:
-            return self.dropout(self.value_embedding(x))
-
-        # if x_mark is None:
-        #     x = self.value_embedding(x)
+        # if x_mark is not None:
+        #     # Synchronize time dimension if off-by-one due to pooling
+        #     if x.size(1) != x_mark.size(1):
+        #         min_len = min(x.size(1), x_mark.size(1))
+        #         x = x[:, :min_len, :]
+        #         x_mark = x_mark[:, :min_len, :]
+        #     return self.dropout(
+        #         self.value_embedding(x) + self.temporal_embedding(x_mark)
+        #     )
         # else:
-        #     x = self.value_embedding(x) + self.temporal_embedding(x_mark)
-        # return self.dropout(x)
+        #     return self.dropout(self.value_embedding(x))
+
+        if x_mark is None:
+            x = self.value_embedding(x)
+        else:
+            x = self.value_embedding(x) + self.temporal_embedding(x_mark)
+        return self.dropout(x)
 
 
 
